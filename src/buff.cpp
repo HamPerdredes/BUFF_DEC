@@ -47,7 +47,7 @@ armor_KF(4,2,0,CV_32F),center_R(Point2f(1,1)),measurement(Mat::zeros(2,1,CV_32F)
     randn(armor_KF.statePost, Scalar::all(0), Scalar::all(0.1));//初始化状态为随机值
 }
 
-void BUFF::process()//优化整体方案，提速,编写技术文档       上下垂直会出现检测不到的情况
+void BUFF::process()
 {
     if(color_type!="red" && color_type!="blue"){
         cout<<"incorrect type of color"<<endl;
@@ -78,7 +78,7 @@ void BUFF::process()//优化整体方案，提速,编写技术文档       上�
     }
         is_armor_detect=false;
         imshow("original",origin_img);
-        imshow("detected_armor",result_img);
+        //imshow("detected_armor",result_img);
         gettimeofday(&end,nullptr);
         double result=(end.tv_sec-st.tv_sec)*1000.+(end.tv_usec-st.tv_usec)/1000;
         total_cost=total_cost+result/1000;
@@ -86,7 +86,7 @@ void BUFF::process()//优化整体方案，提速,编写技术文档       上�
         double ave=total_cost/frame_count;
         cout<<"average cost "<<ave<<" s"<<endl;
         cout<<"total_frame:"<<frame_count<<"  total time:"<<total_cost<<endl;
-        waitKey(0); 
+        waitKey(1); 
     }
 }
 void BUFF::init_img()//根据能量机关颜色对图像进行分割，得到二值化图像
@@ -102,8 +102,7 @@ void BUFF::init_img()//根据能量机关颜色对图像进行分割，得到二
     else{    //blue
         cur_img=YUV_img_channel[1]-YUV_img_channel[2];
         B_R_img=BGR_channel[0]-BGR_channel[2];}
-    threshold(B_R_img,B_R_img,gray_thresh,255,0);
-    imshow("BR_IMG",B_R_img);
+    //imshow("BR_IMG",B_R_img);
     Mat YUV_temp,gray_temp;
     threshold(cur_img,YUV_bin,color_thresh,255,0);
     threshold(gray_img,gray_bin,gray_thresh,255,0);
@@ -111,9 +110,9 @@ void BUFF::init_img()//根据能量机关颜色对图像进行分割，得到二
     dilate(YUV_bin,YUV_temp,kernel); 
     dilate(gray_bin,gray_temp,kernel);
     cur_img=YUV_temp & gray_temp;
-    imshow("BR_IMG",B_R_img);
-    imshow("YUV_after_dilate",YUV_temp);
-    imshow("gray_after_dilate",gray_temp);
+    //imshow("BR_IMG",B_R_img);
+    //imshow("YUV_after_dilate",YUV_temp);
+    //imshow("gray_after_dilate",gray_temp);
     fillHole(cur_img,filled_img);
 }
 
@@ -152,7 +151,7 @@ void BUFF::get_center_R()//直接划分四个象限，计算0到2pi的旋转角�
     vector< vector<Point> > contours;
     //Mat temp;
     erode(filled_img,filled_img,erode_kernel);//看具体图像比例，或者设置一个erode的size 
-    imshow("img for center detect",filled_img);//filled_img
+    //imshow("img for center detect",filled_img);//filled_img
     findContours(filled_img,contours,CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
     int center_max_size=0;
     for(int i=0;i<contours.size();i++)
@@ -256,10 +255,10 @@ void BUFF::check_armor()//SVM检验装甲叶片，看是否要打击
         Mat warp_mat=getAffineTransform(warp_src_points,warp_dst_points);
         warpAffine(B_R_img,possible_swing,warp_mat,possible_swing.size());//test
         //warpAffine(gray_bin,possible_swing,warp_mat,possible_swing.size());
-        imshow("possilbe_swing",possible_swing);
+        //imshow("possilbe_swing",possible_swing);
         if(is_save_data){
             string file_route="./data/"+to_string(frame_count)+".jpg";
-            frame_count++;
+            //frame_count++;
             imwrite(file_route,possible_swing);
         }
         possible_swing=possible_swing.reshape(0,1);
